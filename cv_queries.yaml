@@ -1,0 +1,24 @@
+analyze_jd: |
+  You are an expert in keyword extraction.
+  Please analyze the following job description and extract only the most relevant keywords and key phrases that describe specific skills, qualifications, and experience required for the job.
+  Focus on technical terms, specific technologies, tools, methodologies, and other job-specific competencies. Avoid general or overly common terms.
+
+  Only output a list of these main keywords and key phrases, separated by commas, with no additional explanations or text.
+
+  {job_description}
+
+
+rewrite_section: |
+  Here is a string representing a section from a CV:
+  {section_text}
+
+  Here are relevant keywords for the job description:
+  {keywords}
+
+  Rewrite the CV section using a language optimized for applicant tracking systems (ATS), incorporating the provided keywords where naturally applicable.
+
+  Do not add new experience.
+  If a keyword does not naturally fit, do not force it.
+  If the string does not contain any information, provide the same string as the output.
+  Use the same language that is used in the CV.
+  Output only the modified string, with no explanations, notes or additional text.

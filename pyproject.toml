@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "cv-adapter"
+version = "0.1.0"
+description = ""
+authors = ["Alberto Ferrarin <48485252+Ferraa96@users.noreply.github.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+tqdm = "^4.67.1"
+pyyaml = "^6.0.2"
+langchain-community = "^0.3.20"
+langchain-groq = "^0.3.0"
+rendercv = "^2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+start = "cv_adapter.adapt_cv:main"

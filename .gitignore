@@ -1,0 +1,11 @@
+*
+
+!data
+!.gitignore
+!adapt_cv.py
+!cv_queries.yaml
+!llm_service.py
+!poetry.lock
+!pyproject.toml
+!edit.env
+!README.md
