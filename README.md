@@ -34,18 +34,15 @@ CV Adapter is a tool designed to adapt your CV based on a job description. It le
 
 1. Place your job description in the `data/job_description.txt` file.
 2. Place your CV data in the `data/cv.yaml` file.
+If you don't have a CV in .yaml format, you can use the provided template in `data/cv_template.yaml`.
 3. Run the CV Adapter:
-    ```sh
-    poetry run start
-    ```
-
-4. The modified CV will be saved to `data/cv_modified.yaml`.
-5. To render the modified CV, run:
     ```sh
     poetry run python adapt_cv.py
     ```
 
+4. The modified CV will be saved to `rendercv_output/cv_modified.yaml`.
+
 ## Project Structure
 
-- `data/`: Directory containing job descriptions, CV data, and rendered CVs.
+- `data/`: Directory containing job description and CV data.
 - `rendercv_output/`: Directory containing the output of the rendered CVs.

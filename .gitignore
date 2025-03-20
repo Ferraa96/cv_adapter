@@ -1,6 +1,7 @@
 *
 
 !data
+!data/cv_template.yaml
 !.gitignore
 !adapt_cv.py
 !cv_queries.yaml
