@@ -1,6 +1,8 @@
+import json
 import os
+import sys
+from loading_anim import loading_animation
 from dotenv import load_dotenv
-from tqdm import tqdm
 import yaml
 from llm_service import LLMService
 import subprocess
@@ -8,26 +10,7 @@ import subprocess
 
 class AdaptCV:
     
-    def transform_cv(self, data, transform_func, cv_writer, keywords=None):
-        progress_bar = tqdm(desc="Processed elements", unit=" items")
-        
-        def traverse_dict(data, transform_func, cv_writer, keywords):
-            progress_bar.update(1)
-            if isinstance(data, dict):
-                return {k: traverse_dict(v, transform_func, cv_writer, keywords) for k, v in data.items()}
-            elif isinstance(data, list):
-                return [traverse_dict(v, transform_func, cv_writer, keywords) for v in data]
-            elif isinstance(data, str):
-                return transform_func(cv_writer, {'section_text': data, 'keywords': keywords})
-            else:
-                return data
-        
-        transformed_data = traverse_dict(data, transform_func, cv_writer, keywords)
-        progress_bar.close()
-        
-        return transformed_data
-
-    
+    @loading_animation
     def adapt(self):
         """
         Adapt the CV based on the job description.
@@ -64,36 +47,58 @@ class AdaptCV:
         
         print("Processing the job description...")
         job_analyzer = queries["analyze_jd"]
-        cv_writer = queries["rewrite_section"]
+        cv_writer = queries["rewrite_sections"]
         
         keywords = llm_service.query_llm(job_analyzer, {'job_description': job_description})
         print("Keywords extracted from the job description:")
         print(keywords)
         
         print("Rewriting the CV sections based on the job description...")
-        cv_content['cv']['sections'] = self.transform_cv(
-            cv_content['cv']['sections'], 
-            llm_service.query_llm,
-            cv_writer,
-            keywords
-        )
+        valid_output = False
+        failed_runs = 0
+        while not valid_output:
+            modified_sections = llm_service.query_llm(
+                cv_writer, 
+                {
+                    'sections_text': cv_content['cv']['sections'], 
+                    'keywords': keywords
+                }
+            ).replace("'", "\"")
+            
+            # fix malformed json output
+            if modified_sections.startswith('`'):
+                modified_sections = '\n'.join(modified_sections.splitlines()[1:]).rstrip('`')
+            
+            try:
+                modified_sections = json.loads(modified_sections)
+            except json.decoder.JSONDecodeError:
+                failed_runs += 1
+                print(f'Failed to decode the modified CV sections, retrying (attempt {failed_runs+1})')
+                if failed_runs > 1:
+                    print("Failed to decode the modified CV sections. Please try again.")
+                    print(modified_sections)
+                    sys.exit()
+        
+        cv_content['cv']['sections'] = modified_sections
         
         with open('data/cv_modified.yaml', 'w') as file:
             yaml.dump(cv_content, file, default_flow_style=False, sort_keys=False)
     
     
+    @loading_animation
     def run_render_cv(self):
         """
         Run the 'rendercv render' command to render the modified CV.
         render_cv creates the cv files from the CV data in the 'rendercv_output' folder.
         """
         cv_file = 'data/cv_modified.yaml'
-        result = subprocess.run(["rendercv", "render", cv_file], capture_output=True, text=True, shell=True)
         
-        if not result.returncode == 0:
-            print('An error occurred while running the command.')
-            print('Error in rendering the CV.')
-        
+        with subprocess.Popen(["rendercv", "render", cv_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True) as process:
+            for line in process.stdout:
+                print(line, end='')
+
+            for line in process.stderr:
+                print(line, end='', file=sys.stderr)
 
 
 def main():

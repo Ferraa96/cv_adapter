@@ -1,5 +1,6 @@
-from langchain_community.llms import OpenAI, Ollama
+from langchain_community.llms import OpenAI
 from langchain_groq import ChatGroq
+from langchain_ollama import OllamaLLM
 from langchain.prompts import PromptTemplate
 
 
@@ -25,7 +26,7 @@ class LLMService:
         """
         match provider:
             case "ollama":
-                llm = Ollama(model=model_name)
+                llm = OllamaLLM(model=model_name)
             case "openai":
                 llm = OpenAI(temperature=0)
             case "groq":
@@ -34,6 +35,16 @@ class LLMService:
                 raise ValueError("Invalid provider. Supported providers are 'ollama', 'openai', and 'groq'.")
         
         return llm
+    
+    
+    def get_text_result(self, result):
+        match self.provider_name:
+            case 'ollama':
+                return result
+            case 'openai':
+                return result.choices[0].text
+            case 'groq':
+                return result.content
     
     
     def query_llm(self, prompt: str, variables: dict[str, str]):
@@ -55,5 +66,4 @@ class LLMService:
         chain = prompt | self.llm
         result = chain.invoke(variables)
         
-        return result.content
-    
+        return self.get_text_result(result)

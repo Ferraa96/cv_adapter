@@ -8,17 +8,17 @@ analyze_jd: |
   {job_description}
 
 
-rewrite_section: |
-  Here is a string representing a section from a CV:
-  {section_text}
+rewrite_sections: |
+  Here is a json text representing sections from a CV:
+  {sections_text}
 
   Here are relevant keywords for the job description:
   {keywords}
 
-  Rewrite the CV section using a language optimized for applicant tracking systems (ATS), incorporating the provided keywords where naturally applicable.
+  Rewrite the CV sections using a language optimized for applicant tracking systems (ATS), incorporating the provided keywords where naturally applicable.
 
   Do not add new experience.
   If a keyword does not naturally fit, do not force it.
-  If the string does not contain any information, provide the same string as the output.
   Use the same language that is used in the CV.
-  Output only the modified string, with no explanations, notes or additional text.
+
+  Output only the **modified JSON**. Do not include any markdown or code block formatting. Do not include any backticks, triple backticks (```), or any other extra formatting. Only provide the content of the modified JSON. The result must be valid JSON and contain no additional explanations, notes, or text.
