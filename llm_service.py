@@ -1,4 +1,4 @@
-from langchain_community.llms import OpenAI
+from langchain_openai import ChatOpenAI
 from langchain_groq import ChatGroq
 from langchain_ollama import OllamaLLM
 from langchain.prompts import PromptTemplate
@@ -28,7 +28,7 @@ class LLMService:
             case "ollama":
                 llm = OllamaLLM(model=model_name)
             case "openai":
-                llm = OpenAI(temperature=0)
+                llm = ChatOpenAI(temperature=0, model="gpt-4o", api_key=api_key)
             case "groq":
                 llm = ChatGroq(temperature=0, model_name="llama-3.3-70b-versatile", api_key=api_key)
             case _:
