@@ -6,6 +6,7 @@
 !adapt_cv.py
 !cv_queries.yaml
 !llm_service.py
+!loading_anim.py
 !poetry.lock
 !pyproject.toml
 !edit.env

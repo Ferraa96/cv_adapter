@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from typing import Union
 from loading_anim import loading_animation
 from dotenv import load_dotenv
 import yaml
@@ -9,6 +10,36 @@ import subprocess
 
 
 class AdaptCV:
+    
+    def sanitize_cv(self, cv_content: str) -> Union[bool, dict]:
+        """
+        Sanitize the CV content by removing unwanted characters and formatting.
+        
+        Args:
+        - cv_content (str): The CV content to sanitize.
+        
+        Returns:
+        - bool: True if the CV content is valid, False otherwise.
+        - dict: The sanitized CV content as a dictionary.
+        """
+        
+        cv_content = cv_content.replace("'", "\"")
+        
+        # remove the first line if it is not a json object
+        if not cv_content.startswith('{'):
+            cv_content = '\n'.join(cv_content.splitlines()[1:]).rstrip('`')
+        
+        try:
+            cv_content = json.loads(cv_content)
+        except json.decoder.JSONDecodeError:
+            return False, {}
+        
+        # all values of the json object should be lists
+        for key, value in cv_content.items():
+            if not isinstance(value, list):
+                cv_content[key] = [value]
+        
+        return True, cv_content
     
     @loading_animation
     def adapt(self):
@@ -23,10 +54,10 @@ class AdaptCV:
         queries_file = 'cv_queries.yaml'
         
         try:
-            with open(job_description_file, 'r') as file:
+            with open(job_description_file, 'r', encoding='utf-8') as file:
                 job_description = file.read()
             
-            with open(cv_file, 'r') as file:
+            with open(cv_file, 'r', encoding='utf-8') as file:
                 cv_content = file.read()
                 cv_content = yaml.safe_load(cv_content)
             
@@ -37,7 +68,6 @@ class AdaptCV:
         except FileNotFoundError:
             raise FileNotFoundError("Please make sure that the 'job_description.txt' and 'cv.yaml' files exist in the 'data' directory.")
             
-        
         load_dotenv()
         llm_service = LLMService(
             provider=os.getenv("AI_PROVIDER"),
@@ -63,29 +93,24 @@ class AdaptCV:
                     'sections_text': cv_content['cv']['sections'], 
                     'keywords': keywords
                 }
-            ).replace("'", "\"")
+            )
+            print('Done!')
             
-            # fix malformed json output
-            if modified_sections.startswith('`'):
-                modified_sections = '\n'.join(modified_sections.splitlines()[1:]).rstrip('`')
+            valid_output, modified_sections = self.sanitize_cv(modified_sections)
             
-            try:
-                modified_sections = json.loads(modified_sections)
-            except json.decoder.JSONDecodeError:
+            if not valid_output:
                 failed_runs += 1
                 print(f'Failed to decode the modified CV sections, retrying (attempt {failed_runs+1})')
                 if failed_runs > 1:
                     print("Failed to decode the modified CV sections. Please try again.")
-                    print(modified_sections)
+                    print(cv_content)
                     sys.exit()
         
         cv_content['cv']['sections'] = modified_sections
-        
         with open('data/cv_modified.yaml', 'w') as file:
             yaml.dump(cv_content, file, default_flow_style=False, sort_keys=False)
     
     
-    @loading_animation
     def run_render_cv(self):
         """
         Run the 'rendercv render' command to render the modified CV.
@@ -96,7 +121,7 @@ class AdaptCV:
         with subprocess.Popen(["rendercv", "render", cv_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True) as process:
             for line in process.stdout:
                 print(line, end='')
-
+                
             for line in process.stderr:
                 print(line, end='', file=sys.stderr)
 

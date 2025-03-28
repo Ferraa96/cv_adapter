@@ -67,3 +67,4 @@ class LLMService:
         result = chain.invoke(variables)
         
         return self.get_text_result(result)
+    

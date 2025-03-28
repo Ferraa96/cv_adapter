@@ -20,5 +20,6 @@ rewrite_sections: |
   Do not add new experience.
   If a keyword does not naturally fit, do not force it.
   Use the same language that is used in the CV.
+  Mantain the same exact structure of the json text, keeping all lists and arrays intact.
 
-  Output only the **modified JSON**. Do not include any markdown or code block formatting. Do not include any backticks, triple backticks (```), or any other extra formatting. Only provide the content of the modified JSON. The result must be valid JSON and contain no additional explanations, notes, or text.
+  Output only the modified JSON. Do not include any markdown or code block formatting. Do not include any backticks, triple backticks (```), or any other extra formatting. Only provide the content of the modified JSON. The result must be valid JSON and contain no additional explanations, notes, or text.

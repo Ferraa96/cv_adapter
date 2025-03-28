@@ -12,7 +12,7 @@ tqdm = "^4.67.1"
 pyyaml = "^6.0.2"
 langchain-community = "^0.3.20"
 langchain-groq = "^0.3.0"
-rendercv = "^2.2"
+rendercv = {extras = ["full"], version = "^2.2"}
 langchain-openai = "^0.3.10"
 langchain-ollama = "^0.3.0"
 
